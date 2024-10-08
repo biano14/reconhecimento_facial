@@ -67,6 +67,36 @@ def captura(largura, altura):
     camera.release()
     cv2.destroyAllWindows()
 
+def get_imagem_com_id():
+    caminhos = [os.path.join('fotos', f) for f in os.listdir('fotos')]
+    faces = []
+    ids = []
+    
+    for caminho_imagem in caminhos:
+        imagem_face = cv2.cvtColor(cv2.imread(caminho_imagem), cv2.COLOR_BGR2GRAY)
+        id = int(os.path.split(caminho_imagem)[-1].split('.'[1]))
+        ids.append(id)
+        faces.append(imagem_face)
+    return np.array(ids), faces
+def treinamento():
+    # cria os elementos de reconhecimento necessarios
+    eigenface = cv2.face.EigenFaceRecognizer_create()
+    fisherface = cv2.face.FisherFaceRecognizer_create()
+    lbph = cv2.face.LBPHFaceRecognizer_create()
+    ids, faces = get_imagem_com_id()
+    
+    #treinando o algoritmo do programa
+    print('Treinando...')
+    eigenface.train(faces, ids)
+    eigenface.write('classificadorEigen.ymL')
+    fisherface.train(faces, ids)
+    fisherface.write('classificadorFisher.ymL')
+    lbph.train(faces, ids)
+    lbph.write('classicadorLBPH.ymL')
+    
+    # finaliza treinamento
+    print('Treinamento finalizado com sucesso!')
+    
 # Programa principal
 if __name__ == '__main__':
     # definir o tamanho da camera
@@ -77,6 +107,7 @@ if __name__ == '__main__':
         # Menu
         print('0 - Sair do programa.')
         print('1 - Capturar imagem do usuário.')
+        print('2 - Treinar sistema.')
         
         opcao = input('Opção desejada: ')
         
@@ -87,3 +118,8 @@ if __name__ == '__main__':
             case '1':
                 captura(largura, altura)
                 continue
+            case '2':
+                treinamento()
+                continue
+            case _:
+                print('Opção invalida.')
